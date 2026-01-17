@@ -35,7 +35,7 @@ function handleMotion(event) {
   const maxRecent = Math.max(...recentMagnitudes);
   const avgRecent = recentMagnitudes.reduce((a, b) => a + b, 0) / recentMagnitudes.length;
 
-  const FALL_THRESHOLD = 23;
+  const FALL_THRESHOLD = 20;
   const SLOW_DESCENT_THRESHOLD = 10;
 
 
