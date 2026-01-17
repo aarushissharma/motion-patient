@@ -1,17 +1,20 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Watchful Sensor</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Motion Live Movement</title>
+  <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Watchful Sensor</h1>
-  <p>Status: <span id="status">Normal</span></p>
-  <p>Accel: <span id="accel">0</span></p>
-  <p>Rotation: <span id="gyro">0</span></p>
+  <h1>Motion – Fall Detection Demo</h1>
 
-  <script src="config.js"></script>
-  <script src="sensor.js"></script>
-  
+  <button id="permissionBtn">Enable Motion</button>
+
+  <pre id="debug">Waiting for motion...</pre>
+  <h2 id="status">Status: Idle</h2>
+
+  <script src="js/movement.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

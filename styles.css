@@ -1,0 +1,29 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+#status {
+  font-size: 24px;
+  font-weight: bold;
+  margin-top: 20px;
+}
+
+#status.fall {
+  color: red;
+}
+
+#status.slow {
+  color: orange;
+}
+
+#status.normal {
+  color: green;
+}
+
+button {
+  font-size: 18px;
+  padding: 10px 20px;
+  margin-bottom: 20px;
+}
