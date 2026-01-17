@@ -1,5 +1,8 @@
 const permissionBtn = document.getElementById("permissionBtn");
 
+let fallCooldown = false;
+const FALL_COOLDOWN_MS = 2000; // 2 seconds lock
+
 let recentMagnitudes = [];
 const WINDOW_SIZE = 10; // ~0.3–0.5s depending on device
 let motionCallback = null;
@@ -30,14 +33,26 @@ function handleMotion(event) {
   // Determine event type
   let eventType = "NORMAL";
   const maxRecent = Math.max(...recentMagnitudes);
-  const avgRecent =
-    recentMagnitudes.reduce((a, b) => a + b, 0) / recentMagnitudes.length;
+  const avgRecent = recentMagnitudes.reduce((a, b) => a + b, 0) / recentMagnitudes.length;
 
-  if (maxRecent > 25 && avgRecent < 12) {
+  const FALL_THRESHOLD = 23;
+  const SLOW_DESCENT_THRESHOLD = 10;
+
+
+  if (maxRecent > FALL_THRESHOLD && avgRecent < SLOW_DESCENT_THRESHOLD) {
     eventType = "FALL";
-  } else if (avgRecent > 12 && maxRecent < 25) {
+  } else if (avgRecent > SLOW_DESCENT_THRESHOLD && maxRecent < FALL_THRESHOLD) {
     eventType = "SLOW DESCENT";
   }
+
+  if (eventType === "FALL" && !fallCooldown) {
+    fallCooldown = true;
+    setTimeout(() => (fallCooldown = false), FALL_COOLDOWN_MS);
+} else if (eventType === "FALL" && fallCooldown) {
+// Prevent duplicate fall during cooldown
+    eventType = "NORMAL";
+}
+
 
   // Send data to main.js
   if (motionCallback) {
