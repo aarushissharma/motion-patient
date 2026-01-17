@@ -1,23 +1,30 @@
-import 'dotenv/config';
-import OpenAI from "openai";
+import express from "express";
+import fetch from "node-fetch"; // Node 18+ has fetch built-in
+import dotenv from "dotenv";
 
-export default async function handler(req, res) {
-    try {
-        const { messages } = req.body;
-        const client = new OpenAI({apiKey: process.env.OPENAI_API_KEY});
+dotenv.config();
+const app = express();
+app.use(express.json());
 
-        const response = await client.chat.completions.create({
-            model: "gemini-1.5",
-            messages,
-            temperature: 0.7,
-            max_output_tokens: 200
+app.post("/api/gemini-chat", async (req, res) => {
+  const { messages } = req.body;
 
-        });
-        res.status(200).json({ text: response.choices[0].message.content });
+  try {
+    const response = await fetch("https://api.gemini.ai/v1/chat", { 
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.GEMINI_API_KEY}`
+      },
+      body: JSON.stringify({ messages })
+    });
 
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({error: "API request failed."});
+    const data = await response.json();
+    res.json({ text: data.outputText || data.text });
+  } catch (err) {
+    console.error("Gemini API call failed:", err);
+    res.status(500).json({ error: "Failed to call Gemini API" });
+  }
+});
 
-    }
-}
+app.listen(3000, () => console.log("Server running on http://localhost:3000"));
