@@ -1,5 +1,11 @@
 const permissionBtn = document.getElementById("permissionBtn");
 
+let motionCallback = null;
+
+function startMotionTracking(callback) {
+  motionCallback = callback;
+}
+
 let lastMagnitude = 0;
 
 // Utility to calculate vector magnitude
@@ -12,18 +18,29 @@ function handleMotion(event) {
   const acc = event.accelerationIncludingGravity;
   if (!acc) return;
 
-  const magnitude = calculateMagnitude(acc);
+  const magnitude = Math.sqrt(
+    acc.x ** 2 + acc.y ** 2 + acc.z ** 2
+  );
 
-  let eventType = "Normal";
+  let eventType = "NORMAL";
 
-  // Example thresholds (tweak as needed)
   if (magnitude > 25) {
-    eventType = "Fall";
+    eventType = "FALL";
   } else if (magnitude > 12) {
-    eventType = "Slow Descent";
+    eventType = "SLOW DESCENT";
   }
 
-  lastMagnitude = magnitude;
+  if (motionCallback) {
+    motionCallback({
+      ax: acc.x,
+      ay: acc.y,
+      az: acc.z,
+      magnitude,
+      eventType
+    });
+  }
+}
+
 
   // Callback to main.js
   if (typeof onMotionData === "function") {
@@ -35,7 +52,7 @@ function handleMotion(event) {
       eventType
     });
   }
-}
+
 
 // Request motion permission and start tracking
 async function enableMotion() {
@@ -64,5 +81,14 @@ async function enableMotion() {
   }
 }
 
+if (motionCallback) {
+  motionCallback({
+    ax,
+    ay,
+    az,
+    magnitude,
+    eventType
+  });
+}
 // Hook button click
 permissionBtn.addEventListener("click", enableMotion);
