@@ -7,14 +7,27 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-  <h1>Motion – Fall Detection Demo</h1>
+    <div class="container">
+        <h1>Motion Demo</h1>
 
-  <button id="permissionBtn">Enable Motion</button>
+        <button id="startBtn">Enable Motion</button>
 
-  <pre id="debug">Waiting for motion...</pre>
-  <h2 id="status">Status: Idle</h2>
+        <div id="statusCard" class="status normal">
+            <h2 id="statusText">Idle</h2>
+            <p id="statusSub">Waiting for movement…</p>
+        </div>
 
-  <script src="js/movement.js"></script>
-  <script src="js/main.js"></script>
+        <div class="meter">
+            <div id="meterFill"></div>
+        </div>
+
+        <pre id="debug"></pre>
+    
+
+    <pre id="debug">Waiting for motion...</pre>
+    <h2 id="status">Status: Idle</h2>
+
+    <script src="js/movement.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>
