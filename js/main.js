@@ -1,6 +1,4 @@
-
-
-console.log("main.js loaded");
+import { startGeminiFallCheckIn } from "./ai-gemini.js";
 
 const statusCard = document.getElementById("statusCard");
 const statusText = document.getElementById("statusText");
@@ -35,3 +33,8 @@ Magnitude: ${data.magnitude.toFixed(2)}
 Event: ${data.eventType}
   `;
 });
+
+if (data.eventType === "FALL") {
+  // log fall or update UI
+  startGeminiFallCheckIn(); // trigger voice AI
+}
