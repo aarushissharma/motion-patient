@@ -7,36 +7,35 @@
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
-    <div class="container">
-        <h1>Motion Demo</h1>
+  <div class="container">
+    <h1>Motion Demo</h1>
 
-        
-        <button id="permissionBtn">Enable Motion</button>
+    <!-- Motion Permission Button -->
+    <button id="permissionBtn">Enable Motion</button>
 
+    <!-- Status Card -->
+    <div id="statusCard" class="status normal">
+      <h2 id="statusText">Idle</h2>
+      <p id="statusSub">Waiting for movement…</p>
+    </div>
 
-        <div id="statusCard" class="status normal">
-            <h2 id="statusText">Idle</h2>
-            <p id="statusSub">Waiting for movement…</p>
-        </div>
+    <!-- Fall Log -->
+    <div id="fallLogContainer">
+      <h3>Fall Events</h3>
+      <div id="fallLog"></div>
+    </div>
 
-        <div id="fallLogContainer">
-            <h3>Fall Events</h3>
-            <div id="fallLog"></div>
-        </div>
+    <!-- Motion Meter -->
+    <div class="meter">
+      <div id="meterFill"></div>
+    </div>
 
-        
-
-        <div class="meter">
-            <div id="meterFill"></div>
-        </div>
-
-        <pre id="debug"></pre>
-    
-
+    <!-- Debug Panel -->
     <pre id="debug">Waiting for motion...</pre>
-    <h2 id="status">Status: Idle</h2>
+  </div>
 
-    <script src="js/movement.js"></script>
-    <script src="js/main.js"></script>
+  <!-- JS -->
+  <script src="js/movement.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>
