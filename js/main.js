@@ -1,5 +1,5 @@
 // main.js
-import { startGeminiFallCheckIn } from "./ai-gemini.js"; // <-- top of the file
+import { startOpenAIFallCheckIn } from "./ai-openai.js";
 
 const statusCard = document.getElementById("statusCard");
 const statusText = document.getElementById("statusText");
@@ -7,6 +7,19 @@ const statusSub = document.getElementById("statusSub");
 const meterFill = document.getElementById("meterFill");
 const debugEl = document.getElementById("debug");
 const fallLog = document.getElementById("fallLog");
+
+document.getElementById("callCaregiverBtn").addEventListener("click", () => {
+  fetch("http://localhost:3000/ai/emergency-trigger", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      patientId: "john123",
+      type: "caregiver"
+    })
+  })
+    .then(() => alert("Caregiver has been contacted!"))
+    .catch((err) => console.error("Emergency trigger error:", err));
+});
 
 startMotionTracking((data) => {
   statusText.innerText = data.eventType;
@@ -23,8 +36,10 @@ startMotionTracking((data) => {
     logEntry.innerText = `${timestamp} - FALL detected!`;
     fallLog.prepend(logEntry);
 
-    // Trigger Gemini voice AI
-    startGeminiFallCheckIn("I just fell and need assistance!");
+    //OpenAI trigger
+    startOpenAIFallCheckIn(
+      `Fall detected in living room! `
+    );
   }
 
   let meterPercent = Math.min((data.magnitude / 30) * 100, 100);
@@ -39,3 +54,5 @@ Magnitude: ${data.magnitude.toFixed(2)}
 Event: ${data.eventType}
   `;
 });
+
+window.startOpenAIFallCheckIn = startOpenAIFallCheckIn;

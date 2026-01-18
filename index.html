@@ -22,10 +22,14 @@
       <p id="statusSub">Waiting for movement…</p>
     </div>
 
+    <!-- cargiver calling button -->
+    <button id="callCaregiverBtn" style="display:none;">Call Caregiver</button>
+
+
     <!-- Fall Log -->
     <div id="fallLogContainer">
-      <h3>Fall Events</h3>
-      <div id="fallLog"></div>
+        <h3>Fall Events</h3>
+        <div id="fallLog"></div>
     </div>
 
     <!-- Motion Meter -->
@@ -39,7 +43,7 @@
 
   <!-- JS -->
   <script src="js/movement.js"></script>
-  <script type="module" src="js/ai-gemini.js"></script>
+  <script type="module" src="./js/ai-openai.js"></script>
   <script type="module" src="js/main.js"></script>
 
 

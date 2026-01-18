@@ -1,53 +1,63 @@
-import dotenv from "dotenv";
-dotenv.config();
-
 import express from "express";
-
-
+import dotenv from "dotenv";
 import OpenAI from "openai";
+import { exec } from "child_process";
 
-
-console.log("OpenAI key loaded:", !!process.env.OPENAI_API_KEY);
-
+dotenv.config();
 const app = express();
 app.use(express.json());
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+console.log("OpenAI key loaded:", !!process.env.OPENAI_API_KEY);
 
-app.get("/", (req, res) => {
-  res.send("AI server is running");
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Store patient conversations in memory
+const conversations = {}; // { patientId: [{ role, content }] }
+
+// Helper: speak message out loud (macOS)
+function speak(message) {
+  exec(`say "${message.replace(/\n/g, ' ')}"`);
+}
+
+// Main endpoint for patient alerts and responses
 app.post("/ai/patient-alert", async (req, res) => {
-  const { name, event, location, heartRate } = req.body;
+  const { patientId, name, message } = req.body;
+  if (!patientId || !message) {
+    return res.status(400).json({ error: "patientId and message are required" });
+  }
 
-  const prompt = `
-You are a calm, gentle AI assistant helping an Alzheimer’s patient.
+  if (!conversations[patientId]) conversations[patientId] = [];
 
-Patient name: ${name}
-Event: ${event}
-Location: ${location}
-Heart rate: ${heartRate}
+  // Append patient message to conversation
+  conversations[patientId].push({ role: "user", content: message });
 
-Speak directly to the patient.
-- Reassure them
-- Ask simple yes/no questions
-- Give clear, short instructions
-- Keep sentences under 12 words
-- Sound calm and supportive
-
-Respond ONLY with what you would say out loud.
+  // System prompt for short, interactive, calm assistant
+  const systemPrompt = `
+You are a calm, gentle AI assistant helping an Alzheimer's patient.
+- Respond ONLY as if speaking out loud.
+- Keep sentences under 12 words.
+- Ask short yes/no questions to check condition.
+- Reassure patient and give simple instructions.
+- Do NOT give step-by-step medical guides.
+- If danger is detected, ask if they want to call 911 or their emergency contact.
 `;
 
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
-      messages: [{ role: "user", content: prompt }]
+      messages: [
+        { role: "system", content: systemPrompt },
+        ...conversations[patientId]
+      ]
     });
 
-    const aiMessage = completion.choices[0].message.content;
+    const aiMessage = completion.choices[0].message.content.trim();
+
+    // Append AI message to conversation
+    conversations[patientId].push({ role: "assistant", content: aiMessage });
+
+    // Speak out loud
+    speak(aiMessage);
 
     res.json({ spokenMessage: aiMessage });
   } catch (err) {
@@ -56,7 +66,16 @@ Respond ONLY with what you would say out loud.
   }
 });
 
-const PORT = 3000;
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+// server.mjs
+app.post("/ai/emergency-trigger", (req, res) => {
+  const { patientId, type } = req.body;
+  if (!patientId || !type) return res.status(400).json({ error: "Missing data" });
+
+  // Trigger emergency logic
+  triggerEmergency(patientId, type);
+
+  res.json({ ok: true });
 });
+
+const PORT = 3000;
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
