@@ -170,24 +170,20 @@ async function testCompleteFlow() {
   }
 }
 
-// Force fix API URL on page load - run immediately, before DOMContentLoaded
-(function fixApiUrlOnLoad() {
-  // Detect if we're on Vercel
-  const isVercel = window.location.hostname.includes('vercel.app');
-  const correctUrl = isVercel 
-    ? window.location.origin  // Use Vercel domain when deployed
-    : 'http://localhost:3001'; // Local server for development
-  
+// Force fix port on page load - run immediately, before DOMContentLoaded
+(function fixPortOnLoad() {
+  // AGGRESSIVELY clear and set correct port
+  const correctUrl = 'http://localhost:5001';
   const cachedUrl = localStorage.getItem('watchful_api_url');
   
   if (cachedUrl !== correctUrl) {
-    console.log('🔧 [IMMEDIATE FIX] Fixing API URL on page load');
+    console.log('🔧 [IMMEDIATE FIX] Fixing port on page load');
     console.log('   Old (wrong):', cachedUrl);
     console.log('   New (correct):', correctUrl);
     localStorage.setItem('watchful_api_url', correctUrl);
-    console.log('✅ [IMMEDIATE FIX] API URL fixed to:', correctUrl);
+    console.log('✅ [IMMEDIATE FIX] Port fixed to:', correctUrl);
   } else {
-    console.log('✅ [IMMEDIATE FIX] API URL already correct:', correctUrl);
+    console.log('✅ [IMMEDIATE FIX] Port already correct:', correctUrl);
   }
   
   // Also update the UI element immediately if it exists
@@ -204,18 +200,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Update UI immediately with the actual API URL being used
   if (apiUrlValueEl) {
     apiUrlValueEl.textContent = apiUrl;
-    console.log('✅ [DOM LOADED] API URL set to:', apiUrl);
-  }
-  
-  // Force update if on Vercel (in case localStorage wasn't cleared)
-  const isVercel = window.location.hostname.includes('vercel.app');
-  if (isVercel && !apiUrl.includes('vercel.app')) {
-    const vercelUrl = window.location.origin;
-    console.log('🔧 [DOM LOADED] Force setting Vercel URL:', vercelUrl);
-    localStorage.setItem('watchful_api_url', vercelUrl);
-    if (apiUrlValueEl) {
-      apiUrlValueEl.textContent = vercelUrl;
-    }
   }
   
   console.log('✅ [DOM LOADED] Using API URL:', apiUrl);
@@ -370,6 +354,16 @@ Event: ${data.eventType}
       if (result.success) {
         console.log('✅ Fall alert sent to watchful backend');
         console.log('📊 Alert will appear in caregiver dashboard shortly');
+        
+        // Get fall alert ID for voice assistant
+        const fallAlertId = result.data?.id || result.data?._fallId || Date.now().toString();
+        
+        // Activate voice assistant
+        if (typeof activateVoiceOnFall === 'function') {
+          console.log('🎤 Activating voice assistant...');
+          activateVoiceOnFall(fallAlertId);
+        }
+        
         // Update UI to show alert was sent
         const lastFallDiv = logEl.querySelector('div:last-child');
         if (lastFallDiv) {

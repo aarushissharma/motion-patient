@@ -14,32 +14,25 @@ const apiUrlFromUrl = urlParams.get('api_url');
     return;
   }
   
-  // Detect if we're on Vercel
-  const isVercel = window.location.hostname.includes('vercel.app');
-  const correctUrl = isVercel 
-    ? window.location.origin  // Use Vercel domain when deployed
-    : 'http://localhost:3001'; // Local server for development
-  
   const cachedUrl = localStorage.getItem('watchful_api_url');
+  const correctUrl = 'http://localhost:5001'; // Backend is on port 5001
   if (cachedUrl && cachedUrl !== correctUrl) {
-    console.log('🔧 [IMMEDIATE FIX] Clearing wrong cached URL:', cachedUrl);
+    console.log('🔧 [IMMEDIATE FIX] Clearing wrong cached port:', cachedUrl);
     localStorage.removeItem('watchful_api_url');
     localStorage.setItem('watchful_api_url', correctUrl);
-    console.log('✅ [IMMEDIATE FIX] Set correct URL:', correctUrl);
+    console.log('✅ [IMMEDIATE FIX] Set correct port:', correctUrl);
   } else if (!cachedUrl) {
     localStorage.setItem('watchful_api_url', correctUrl);
-    console.log('✅ [IMMEDIATE FIX] Set initial URL:', correctUrl);
+    console.log('✅ [IMMEDIATE FIX] Set initial port:', correctUrl);
   }
 })();
 
 // Default configuration - update these values as needed
 const WATCHFUL_CONFIG = {
-  // API base URL - auto-detects Vercel or uses localhost
-  // When deployed on Vercel, uses window.location.origin
-  // For local development, uses localhost:3001
-  API_BASE_URL: typeof window !== 'undefined' && window.location.hostname.includes('vercel.app')
-    ? window.location.origin
-    : 'http://localhost:3001',
+  // API base URL - points to watchful backend
+  // Backend is running on port 5001
+  // Update this to match your watchful backend URL
+  API_BASE_URL: 'http://localhost:5001',
   
   // Patient ID - this should match a patient in your watchful system
   // You can set this dynamically or get it from user input

@@ -34,7 +34,7 @@
             </div>
             <div id="connectionDetails" class="connection-details">
                 <div id="lastUpdate">Never updated</div>
-                <div id="apiUrl">API: <span id="apiUrlValue">Loading...</span></div>
+                <div id="apiUrl">API: <span id="apiUrlValue">http://localhost:5001</span></div>
             </div>
         </div>
 
@@ -48,7 +48,33 @@
             <div id="fallLog"></div>
         </div>
 
-        
+        <!-- Voice Assistant UI -->
+        <div id="voice-assistant" class="voice-assistant-container" style="display: none;">
+            <h3>🎤 AI Voice Assistant</h3>
+            
+            <div id="voice-indicator" class="voice-indicator idle">
+                🎤 Ready to listen
+            </div>
+            
+            <div id="voice-transcript" class="voice-transcript-box" style="display: none;">
+                <strong>You said:</strong>
+                <p id="transcript-text"></p>
+            </div>
+            
+            <div id="voice-response" class="voice-response-box" style="display: none;">
+                <strong>Response:</strong>
+                <p id="response-text"></p>
+            </div>
+            
+            <div id="voice-error" class="voice-error-box" style="display: none;">
+                <strong>⚠️ Error:</strong>
+                <p id="error-text"></p>
+            </div>
+            
+            <button id="stop-voice-btn" class="voice-button" onclick="stopVoiceAssistant()">
+                Stop Voice Assistant
+            </button>
+        </div>
 
         <div class="meter">
             <div id="meterFill"></div>
@@ -63,14 +89,11 @@
       // FORCE FIX PORT - Run before any other scripts
       // If accessed via phone server, this will be replaced with the correct IP
       (function() {
-        // ALWAYS use the current hostname for API (works for both localhost and Vercel)
+        // ALWAYS use the current hostname for API (works for both localhost and phone)
         const hostname = window.location.hostname;
-        const isVercel = hostname.includes('vercel.app');
-        const correctUrl = isVercel
-          ? window.location.origin  // Use Vercel domain (no port needed)
-          : (hostname === 'localhost' || hostname === '127.0.0.1' 
-            ? 'http://localhost:3001' 
-            : 'http://' + hostname + ':3001');
+        const correctUrl = hostname === 'localhost' || hostname === '127.0.0.1' 
+          ? 'http://localhost:5001' 
+          : 'http://' + hostname + ':5001';
         
         console.log('🔧 [HTML FIX] Detected hostname:', hostname);
         console.log('🔧 [HTML FIX] Setting API URL to:', correctUrl);
@@ -92,6 +115,41 @@
     <script src="js/config.js"></script>
     <script src="js/api.js"></script>
     <script src="js/movement.js"></script>
+    <script src="js/voice-assistant.js"></script>
     <script src="js/main.js"></script>
+    
+    <script>
+      // Initialize voice assistant
+      let voiceAssistant = null;
+
+      window.addEventListener('DOMContentLoaded', () => {
+        voiceAssistant = new VoiceAssistant();
+        console.log('✅ Voice assistant initialized');
+      });
+
+      // Function to activate voice assistant when fall is detected
+      function activateVoiceOnFall(fallAlertId) {
+        if (voiceAssistant) {
+          voiceAssistant.activateOnFall(fallAlertId);
+        } else {
+          console.error('Voice assistant not initialized');
+        }
+      }
+
+      // Function to stop voice assistant
+      function stopVoiceAssistant() {
+        if (voiceAssistant) {
+          voiceAssistant.stopListening();
+          if (voiceAssistant.synthesis) {
+            voiceAssistant.synthesis.cancel();
+          }
+        }
+        
+        const voiceDiv = document.getElementById('voice-assistant');
+        if (voiceDiv) {
+          voiceDiv.style.display = 'none';
+        }
+      }
+    </script>
 </body>
 </html>

@@ -86,80 +86,35 @@ async function sendFallAlertToWatchful(fallData) {
       _fallId: `fall_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
     };
 
-    // Determine API URL - use current origin if on Vercel, otherwise localhost
-    const isVercel = window.location.hostname.includes('vercel.app');
-    const apiBaseUrl = isVercel 
-      ? window.location.origin  // Use Vercel domain
-      : 'http://localhost:3001'; // Local development
-    
-    // Send to API (works for both Vercel and local)
-    try {
-      const apiController = new AbortController();
-      const apiTimeoutId = setTimeout(() => apiController.abort(), 5000);
-      
-      const apiResponse = await fetch(`${apiBaseUrl}/api/alerts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: alertData._fallId,
-          time: timeString,
-          magnitude: fallData.magnitude.toFixed(2),
-          timestamp: timestamp,
-          location: alertData.location,
-          message: alertData.message,
-          status: 'active'
-        }),
-        signal: apiController.signal,
-        mode: 'cors'
-      });
-      
-      clearTimeout(apiTimeoutId);
-      
-      if (apiResponse.ok) {
-        const apiResult = await apiResponse.json();
-        console.log('✅ Fall sent to API:', apiResult);
-      }
-    } catch (apiError) {
-      console.warn('⚠️ Could not send to API:', apiError.message);
-    }
-
-    // Also send to watchful backend if configured
+    // Send POST request to watchful backend with timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
     
-    try {
-      const response = await fetch(`${apiUrl}/api/alerts`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(alertData),
-        signal: controller.signal,
-        mode: 'cors'
-      });
-      
-      clearTimeout(timeoutId);
+    const response = await fetch(`${apiUrl}/api/alerts`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(alertData),
+      signal: controller.signal,
+      mode: 'cors'
+    });
+    
+    clearTimeout(timeoutId);
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
-
-      const result = await response.json();
-      const alertTime = new Date().toLocaleTimeString();
-      console.log('✅ Fall alert sent to watchful backend and dashboard:', result);
-      console.log(`📊 Alert sent at ${alertTime} - will appear in dashboard within 1-2 seconds`);
-      console.log(`🌐 Sent to: ${apiUrl}/api/alerts`);
-      console.log(`👤 Patient ID: ${patientId}`);
-      console.log('🔄 Dashboard should refresh automatically to show new alert');
-      return { success: true, data: result };
-    } catch (backendError) {
-      console.warn('⚠️ Could not send to watchful backend:', backendError.message);
-      // Still return success if local server received it
-      return { success: true, data: { message: 'Sent to local server' } };
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
+
+    const result = await response.json();
+    const alertTime = new Date().toLocaleTimeString();
+    console.log('✅ Fall alert sent to watchful backend and dashboard:', result);
+    console.log(`📊 Alert sent at ${alertTime} - will appear in dashboard within 1-2 seconds`);
+    console.log(`🌐 Sent to: ${apiUrl}/api/alerts`);
+    console.log(`👤 Patient ID: ${patientId}`);
+    console.log('🔄 Dashboard should refresh automatically to show new alert');
+    return { success: true, data: result };
 
   } catch (error) {
     console.error('❌ Error sending fall alert to watchful:', error);
@@ -167,18 +122,16 @@ async function sendFallAlertToWatchful(fallData) {
   }
 }
 
-// Test connection to API (works for both Vercel and local)
+// Test connection to watchful backend
 async function testWatchfulConnection() {
   try {
-    // Always use getWatchfulApiUrl() which now handles Vercel detection
     const apiUrl = getWatchfulApiUrl();
     
     // Try to connect with a timeout
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
     
-    // Test the status endpoint
-    const response = await fetch(`${apiUrl}/api/status`, {
+    const response = await fetch(`${apiUrl}/`, {
       method: 'GET',
       headers: {
         'Accept': 'application/json',
@@ -194,25 +147,21 @@ async function testWatchfulConnection() {
     }
     
     const data = await response.json();
-    console.log('✅ API connection successful:', data);
+    console.log('✅ Watchful backend connection successful:', data);
     return { success: true, data };
   } catch (error) {
     let errorMessage = error.message;
     
     // Provide more helpful error messages
     if (error.name === 'AbortError') {
-      errorMessage = 'Connection timeout - API may not be available';
+      errorMessage = 'Connection timeout - backend may not be running';
     } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-      if (window.location.hostname.includes('vercel.app')) {
-        errorMessage = 'Cannot reach API - make sure API routes are deployed on Vercel';
-      } else {
-        errorMessage = 'Cannot reach server - make sure it\'s running: node server.js';
-      }
+      errorMessage = 'Cannot reach backend - make sure it\'s running: python3 app.py';
     } else if (error.message.includes('CORS')) {
-      errorMessage = 'CORS error - check API CORS configuration';
+      errorMessage = 'CORS error - check backend CORS configuration';
     }
     
-    console.error('❌ API connection failed:', errorMessage);
+    console.error('❌ Watchful backend connection failed:', errorMessage);
     return { success: false, error: errorMessage };
   }
 }
@@ -248,60 +197,26 @@ async function sendMotionDataToWatchful(motionData) {
       location: location
     };
 
-    // Determine API URL - use current origin if on Vercel, otherwise localhost
-    const isVercel = window.location.hostname.includes('vercel.app');
-    const apiBaseUrl = isVercel 
-      ? window.location.origin  // Use Vercel domain
-      : 'http://localhost:3001'; // Local development
-    
-    // Send motion data to API (works for both Vercel and local)
-    try {
-      const apiResponse = await fetch(`${apiBaseUrl}/api/motion`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...motionPayload,
-          timestamp: motionPayload.timestamp || new Date().toISOString()
-        }),
-        mode: 'cors',
-        signal: AbortSignal.timeout(5000)
-      });
-      
-      if (apiResponse.ok) {
-        console.log('✅ Motion data sent to API');
-      }
-    } catch (apiError) {
-      console.warn('⚠️ Could not send motion data to API:', apiError.message);
-    }
-
-    // Also send to watchful backend if configured
     console.log('📤 Sending motion data to:', `${apiUrl}/api/motion/data`);
     
-    try {
-      const response = await fetch(`${apiUrl}/api/motion/data`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(motionPayload),
-        mode: 'cors',
-        signal: AbortSignal.timeout(10000) // 10 second timeout
-      });
+    const response = await fetch(`${apiUrl}/api/motion/data`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(motionPayload),
+      mode: 'cors',
+      signal: AbortSignal.timeout(10000) // 10 second timeout
+    });
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
-      }
-
-      const result = await response.json();
-      console.log('✅ Motion data sent successfully:', result);
-      return { success: true, data: result };
-    } catch (backendError) {
-      console.warn('⚠️ Could not send to watchful backend:', backendError.message);
-      return { success: true, data: { message: 'Sent to local server' } };
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
     }
+
+    const result = await response.json();
+    console.log('✅ Motion data sent successfully:', result);
+    return { success: true, data: result };
   } catch (error) {
     console.error('❌ Error sending motion data:', error);
     
