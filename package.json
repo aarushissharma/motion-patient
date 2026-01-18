@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
   "name": "motion",
   "main": "expo-router/entry",
   "version": "1.0.0",
@@ -45,4 +46,34 @@
     "eslint-config-expo": "~10.0.0"
   },
   "private": true
+=======
+  "name": "motion-patient-main",
+  "version": "1.0.0",
+  "description": "Motion detection app with local server for caregiver connection",
+  "main": "server.mjs",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "server": "node server.mjs",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "node-fetch": "^3.3.2",
+    "openai": "^6.16.0"
+  },
+  "devDependencies": {},
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aarushissharma/motion-patient.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+>>>>>>> b36d84494b9d4f1738b0dbe7e211783bbe2745ce
 }

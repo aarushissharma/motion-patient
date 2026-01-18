@@ -1,0 +1,233 @@
+/* ====== Base ====== */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, Inter, sans-serif;
+  background: radial-gradient(
+    1200px 800px at 10% -15%,
+    #312e81,
+    #020617
+  );
+  color: #e5e7eb;
+}
+
+.container {
+  max-width: 420px;
+  margin: auto;
+  padding: 28px;
+}
+
+/* ====== Title ====== */
+h1 {
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+}
+
+/* ====== Button ====== */
+button {
+  width: 100%;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 500;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 30px rgba(139, 92, 246, 0.35);
+  cursor: pointer;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ====== Status Card ====== */
+.status {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 22px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.status h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.status p {
+  margin-top: 6px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* ====== States ====== */
+.status.normal {
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.25),
+              0 10px 40px rgba(99, 102, 241, 0.15);
+}
+
+.status.slow {
+  box-shadow: 0 0 0 1px rgba(236, 72, 153, 0.35),
+              0 10px 40px rgba(236, 72, 153, 0.2);
+}
+
+.status.fall {
+  box-shadow: 0 0 0 1px rgba(248, 113, 113, 0.6),
+              0 15px 50px rgba(248, 113, 113, 0.4);
+  animation: subtlePulse 1.1s infinite;
+}
+
+/* ====== Pulse ====== */
+@keyframes subtlePulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.015); }
+  100% { transform: scale(1); }
+}
+
+/* ====== Motion Meter ====== */
+.meter {
+  margin-top: 18px;
+  height: 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+#meterFill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(
+    90deg,
+    #6366f1,
+    #8b5cf6,
+    #ec4899
+  );
+  transition: width 0.1s linear;
+}
+
+/* ====== Debug ====== */
+pre {
+  margin-top: 18px;
+  font-size: 11px;
+  opacity: 0.5;
+  line-height: 1.4;
+}
+
+
+.fall {
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+.slow {
+  color: orange;
+}
+
+.normal {
+  color: green;
+}
+
+/* ====== Connection Status ====== */
+.connection-status {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 18px;
+  margin-bottom: 20px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.connection-status.connected {
+  box-shadow: 0 0 0 1px rgba(16, 185, 129, 0.3),
+              0 10px 40px rgba(16, 185, 129, 0.15);
+}
+
+.connection-status.disconnected {
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.3),
+              0 10px 40px rgba(239, 68, 68, 0.15);
+}
+
+.connection-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.connection-header h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #e5e7eb;
+}
+
+.refresh-btn {
+  width: auto;
+  padding: 6px 14px;
+  margin: 0;
+  font-size: 13px;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  box-shadow: none;
+}
+
+.refresh-btn:hover {
+  background: rgba(99, 102, 241, 0.3);
+}
+
+.refresh-btn:active {
+  transform: scale(0.95);
+}
+
+.connection-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.connection-text #connectionIcon {
+  font-size: 18px;
+}
+
+.connection-status.connected .connection-text {
+  color: #10b981;
+}
+
+.connection-status.disconnected .connection-text {
+  color: #ef4444;
+}
+
+.connection-details {
+  font-size: 12px;
+  opacity: 0.7;
+  line-height: 1.6;
+}
+
+.connection-details div {
+  margin-top: 4px;
+}
+
+#apiUrlValue {
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+  font-size: 11px;
+  opacity: 0.9;
+}

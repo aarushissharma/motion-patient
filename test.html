@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<body>
+<button id="btn">Enable Motion</button>
+<pre id="out">Waiting...</pre>
+
+<script>
+const btn = document.getElementById("btn");
+const out = document.getElementById("out");
+
+btn.onclick = async () => {
+  if (typeof DeviceMotionEvent.requestPermission === "function") {
+    const response = await DeviceMotionEvent.requestPermission();
+    if (response === "granted") {
+      window.addEventListener("devicemotion", e => {
+        const a = e.accelerationIncludingGravity;
+        out.innerText = `
+X: ${a.x.toFixed(2)}
+Y: ${a.y.toFixed(2)}
+Z: ${a.z.toFixed(2)}
+        `;
+      });
+    } else {
+      alert("Permission denied");
+    }
+  } else {
+    alert("DeviceMotionEvent.requestPermission not available");
+  }
+};
+</script>
+</body>
+</html>

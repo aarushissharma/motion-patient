@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Watchful Connection</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    .test-box {
+      background: white;
+      padding: 20px;
+      margin: 10px 0;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .success { color: #10b981; }
+    .error { color: #ef4444; }
+    .warning { color: #f59e0b; }
+    button {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      margin: 5px;
+    }
+    button:hover { background: #2563eb; }
+    pre {
+      background: #1f2937;
+      color: #10b981;
+      padding: 15px;
+      border-radius: 5px;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔧 Watchful Connection Tester</h1>
+  
+  <div class="test-box">
+    <h2>Step 1: Test Backend Connection</h2>
+    <button onclick="testBackend()">Test Backend</button>
+    <div id="backend-result"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>Step 2: Test Alert Creation</h2>
+    <button onclick="testAlert()">Send Test Alert</button>
+    <div id="alert-result"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>Step 3: Check Dashboard Connection</h2>
+    <button onclick="checkDashboard()">Check Dashboard</button>
+    <div id="dashboard-result"></div>
+  </div>
+
+  <div class="test-box">
+    <h2>Configuration</h2>
+    <pre id="config"></pre>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script>
+    // Display current configuration
+    document.getElementById('config').textContent = JSON.stringify({
+      API_URL: getWatchfulApiUrl(),
+      PATIENT_ID: getPatientId(),
+      ENABLED: WATCHFUL_CONFIG.ENABLED
+    }, null, 2);
+
+    async function testBackend() {
+      const resultDiv = document.getElementById('backend-result');
+      resultDiv.innerHTML = '<p>Testing...</p>';
+      
+      try {
+        const apiUrl = getWatchfulApiUrl();
+        const response = await fetch(`${apiUrl}/`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          resultDiv.innerHTML = `
+            <p class="success">✅ Backend is running!</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          `;
+        } else {
+          resultDiv.innerHTML = `<p class="error">❌ Backend returned error: ${response.status}</p>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <p class="error">❌ Cannot connect to backend</p>
+          <p>Error: ${error.message}</p>
+          <p>Make sure backend is running: <code>python app.py</code></p>
+        `;
+      }
+    }
+
+    async function testAlert() {
+      const resultDiv = document.getElementById('alert-result');
+      resultDiv.innerHTML = '<p>Sending test alert...</p>';
+      
+      try {
+        // Simulate fall data
+        const testFallData = {
+          ax: 10.5,
+          ay: 5.2,
+          az: 20.8,
+          magnitude: 25.3,
+          eventType: 'FALL'
+        };
+        
+        const result = await sendFallAlertToWatchful(testFallData);
+        
+        if (result.success) {
+          resultDiv.innerHTML = `
+            <p class="success">✅ Alert sent successfully!</p>
+            <pre>${JSON.stringify(result.data, null, 2)}</pre>
+            <p>Check the dashboard to see if it appears.</p>
+          `;
+        } else {
+          resultDiv.innerHTML = `
+            <p class="error">❌ Failed to send alert</p>
+            <p>Error: ${result.error || result.message}</p>
+          `;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <p class="error">❌ Error: ${error.message}</p>
+        `;
+      }
+    }
+
+    async function checkDashboard() {
+      const resultDiv = document.getElementById('dashboard-result');
+      resultDiv.innerHTML = '<p>Checking...</p>';
+      
+      try {
+        const apiUrl = getWatchfulApiUrl();
+        const response = await fetch(`${apiUrl}/api/caregivers/caregiver_demo/alerts`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          const alertCount = data.alerts ? data.alerts.length : 0;
+          
+          resultDiv.innerHTML = `
+            <p class="success">✅ Dashboard can fetch alerts!</p>
+            <p>Found ${alertCount} alert(s) for caregiver_demo</p>
+            <details>
+              <summary>View Alerts</summary>
+              <pre>${JSON.stringify(data, null, 2)}</pre>
+            </details>
+          `;
+        } else {
+          resultDiv.innerHTML = `<p class="error">❌ Error: ${response.status}</p>`;
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `
+          <p class="error">❌ Cannot check dashboard</p>
+          <p>Error: ${error.message}</p>
+        `;
+      }
+    }
+
+    // Auto-test on load
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeout(testBackend, 500);
+    });
+  </script>
+</body>
+</html>
