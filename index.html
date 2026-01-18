@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Motion Live Movement</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+    <div class="container">
+        <h1>Motion Demo</h1>
+
+        
+        <button id="permissionBtn">Enable Motion</button>
+        <button id="testConnectionBtn" style="margin-top: 10px; padding: 10px; background: #3b82f6; color: white; border: none; border-radius: 5px; cursor: pointer; display: none;">
+          Test Connection (No Motion Needed)
+        </button>
+        <div id="permissionHelp" style="margin-top: 10px; padding: 10px; background: #f3f4f6; border-radius: 5px; font-size: 12px; display: none;">
+          <strong>iOS 18.6.2 Instructions:</strong><br>
+          1. Settings → Privacy & Security → Motion & Fitness → ON<br>
+          2. Or close Safari completely and reopen it<br>
+          3. Or tap the aA icon → Website Settings → Allow Motion
+        </div>
+
+        <!-- Connection Status -->
+        <div id="connectionStatus" class="connection-status">
+            <div class="connection-header">
+                <h3>Real-time Connection</h3>
+                <button id="refreshBtn" class="refresh-btn" title="Refresh connection">Refresh</button>
+            </div>
+            <div id="connectionStatusText" class="connection-text">
+                <span id="connectionIcon">⏳</span>
+                <span id="connectionMessage">Checking connection...</span>
+            </div>
+            <div id="connectionDetails" class="connection-details">
+                <div id="lastUpdate">Never updated</div>
+                <div id="apiUrl">API: <span id="apiUrlValue">Loading...</span></div>
+            </div>
+        </div>
+
+        <div id="statusCard" class="status normal">
+            <h2 id="statusText">Idle</h2>
+            <p id="statusSub">Waiting for movement…</p>
+        </div>
+
+        <div id="fallLogContainer">
+            <h3>Fall Events</h3>
+            <div id="fallLog"></div>
+        </div>
+
+        
+
+        <div class="meter">
+            <div id="meterFill"></div>
+        </div>
+
+        <pre id="debug">Waiting for motion...</pre>
+        <h2 id="status">Status: Idle</h2>
+
+    <!-- Fix port immediately before any other scripts load -->
+    <!-- NOTE: This will be overridden by phone server if accessed via phone server -->
+    <script>
+      // FORCE FIX PORT - Run before any other scripts
+      // If accessed via phone server, this will be replaced with the correct IP
+      (function() {
+        // ALWAYS use the current hostname for API (works for both localhost and Vercel)
+        const hostname = window.location.hostname;
+        const isVercel = hostname.includes('vercel.app');
+        const correctUrl = isVercel
+          ? window.location.origin  // Use Vercel domain (no port needed)
+          : (hostname === 'localhost' || hostname === '127.0.0.1' 
+            ? 'http://localhost:3001' 
+            : 'http://' + hostname + ':3001');
+        
+        console.log('🔧 [HTML FIX] Detected hostname:', hostname);
+        console.log('🔧 [HTML FIX] Setting API URL to:', correctUrl);
+        
+        // Force set the API URL
+        localStorage.setItem('watchful_api_url', correctUrl);
+        
+        // Update UI immediately
+        window.addEventListener('DOMContentLoaded', function() {
+          const apiUrlEl = document.getElementById('apiUrlValue');
+          if (apiUrlEl) {
+            apiUrlEl.textContent = correctUrl;
+            console.log('✅ [HTML FIX] UI updated with API URL:', correctUrl);
+          }
+        });
+      })();
+    </script>
+    
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/movement.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+{
+  "name": "motion-patient-main",
+  "version": "1.0.0",
+  "description": "Motion detection app with local server for caregiver connection",
+  "main": "server.js",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "server": "node server.js"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "private": true
+}
